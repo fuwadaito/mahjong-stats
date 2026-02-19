@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="JAN STA - 麻雀の成績・収支・統計を可視化する記録サイト">
+        <meta name="theme-color" content="#0f1115">
+
+        <title>JAN STA | Mahjong Statistics</title>
+
+        <!-- Google Font -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="./sanitize.css">
+        <link rel="stylesheet" href="./style.css">
+    </head>
+    <body>
+
+        <header class="header">
+            <div class="logo">JAN STA</div>
+
+            <nav class="nav">
+                <a href="#">ダッシュボード</a>
+                <a href="#">対局登録</a>
+                <a href="#">履歴</a>
+                <a href="#">プレイヤー</a>
+                <a href="#">設定</a>
+            </nav>
+
+            <button class="btn-primary">+ NEW GAME</button>
+        </header>
+
+        <main class="main">
+
+            <!-- 統計カード -->
+            <section class="stats">
+                <div class="card">
+                    <p class="label">総対戦数</p>
+                    <p class="value">124</p>
+                </div>
+
+                <div class="card">
+                    <p class="label">平均順位</p>
+                    <p class="value">2.34</p>
+                </div>
+
+                <div class="card">
+                    <p class="label">ラス回避率</p>
+                    <p class="value">78%</p>
+                </div>
+
+                <div class="card">
+                    <p class="label">連対率</p>
+                    <p class="value">46%</p>
+                </div>
+
+                <div class="card">
+                    <p class="label">役満回数</p>
+                    <p class="value">3</p>
+                </div>
+            </section>
+
+            <!-- グラフ -->
+            <section class="graph-card">
+                <h2>戦績推移</h2>
+                <div class="graph-placeholder">
+                    Chart.jsがここに入ります
+                </div>
+            </section>
+
+            <!-- 順位割合 -->
+            <section class="bottom-grid">
+                <div class="card large">
+                    <h2>順位割合</h2>
+                    <div class="placeholder">円グラフ</div>
+                </div>
+
+                <div class="card large">
+                    <h2>詳細統計</h2>
+                    <ul class="detail-list">
+                        <li>1位率 <span>25%</span></li>
+                        <li>2位率 <span>30%</span></li>
+                        <li>3位率 <span>20%</span></li>
+                        <li>4位率 <span>25%</span></li>
+                        <li>通算収支 <span class="plus">+34,000</span></li>
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="footer">
+            © 2026 JAN STA
+        </footer>
+
+    </body>
+</html>

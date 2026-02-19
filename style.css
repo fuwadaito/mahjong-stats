@@ -1,0 +1,207 @@
+/* ========================
+   BASE
+======================== */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    color: #fff;
+    min-height: 100vh;
+
+    background:
+        radial-gradient(circle at 20% 20%, rgba(0,255,150,0.08), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(0,255,150,0.06), transparent 40%),
+        linear-gradient(135deg, #0f1115, #12161c 40%, #0d1015);
+
+    background-attachment: fixed;
+}
+
+/* ノイズ */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    opacity: 0.04;
+    pointer-events: none;
+}
+
+/* ========================
+   HEADER
+======================== */
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 50px;
+    background: rgba(20,25,32,0.7);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    z-index: 100;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #00ff9c;
+    text-shadow: 0 0 10px rgba(0,255,150,0.6);
+}
+
+.nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #ccc;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav a:hover {
+    color: #00ff9c;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00c97a, #00ff9c);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(0,255,150,0.4);
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+/* ========================
+   MAIN
+======================== */
+.main {
+    padding: 120px 60px 60px;
+}
+
+/* ========================
+   STATS GRID
+======================== */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background: rgba(30, 35, 45, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    padding: 25px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow:
+        0 0 20px rgba(0,255,150,0.05),
+        0 10px 30px rgba(0,0,0,0.6);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.label {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+.value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #00ff9c;
+}
+
+/* ========================
+   GRAPH
+======================== */
+.graph-card {
+    margin-bottom: 40px;
+}
+
+.graph-card h2 {
+    margin-bottom: 20px;
+}
+
+.graph-placeholder {
+    height: 300px;
+    border-radius: 14px;
+    background: rgba(30,35,45,0.8);
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+}
+
+/* ========================
+   BOTTOM GRID
+======================== */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.large {
+    padding: 30px;
+}
+
+.placeholder {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+}
+
+.detail-list {
+    list-style: none;
+    padding: 0;
+}
+
+.detail-list li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.plus {
+    color: #00ff9c;
+}
+
+/* ========================
+   FOOTER
+======================== */
+.footer {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
+@media (max-width: 900px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav {
+        display: none;
+    }
+}
