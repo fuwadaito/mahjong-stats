@@ -1,33 +1,830 @@
+/* ===========================
+   JAN STA - styles.css
+   カラーパレット（デザイン参照）
+   =========================== */
 :root{
-  --bg1:#07100f; --bg2:#0f1b18; --card:#12221f; --accent:#2aa06c; --muted:#9aa4a0;
-  --cream:#f4f1e6;
+  --bg: #0f1917;           /* 全体背景（濃い緑～黒） */
+  --panel-bg: #14221f;     /* パネル背景（少し明るい） */
+  --panel-border: #263330; /* パネル境界線 */
+  --accent: #2fa64a;       /* メインアクセント（ライム系グリーン） */
+  --accent-2: #1f8b3a;     /* 濃いアクセント（ボタン等） */
+  --muted: #94a39a;        /* サブテキスト */
+  --text: #e8f3ef;         /* メインテキスト（明るい） */
+  --highlight: #ffd26a;    /* 補助ハイライト（オレンジ寄り） */
+  --card-shadow: rgba(0,0,0,0.6);
+
+  --font-family: system-ui, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --gap: 12px;
+  --padding: 16px;
+  --radius: 6px;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family: "Noto Sans JP", "Helvetica Neue", Arial; background:linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--cream); min-height:100vh}
-.header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid rgba(255,255,255,0.04)}
-.brand{font-weight:800;font-size:22px}
-.header nav{display:flex;gap:12px;align-items:center}
-.header a{color:var(--muted);text-decoration:none}
-.header a.active{color:#fff;border-bottom:2px solid var(--accent);padding-bottom:6px}
-.btn{background:linear-gradient(180deg,#2fb97b,#1d8a56);border:none;color:#021a12;padding:8px 12px;border-radius:6px;cursor:pointer}
-.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-main{max-width:1100px;margin:24px auto;padding:0 18px}
-.page{display:block}
-.hidden{display:none}
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
-.stat{background:linear-gradient(180deg,#17332e,#0f2a25);padding:16px;border-radius:8px;text-align:center;font-weight:700}
-.card, .panel{background:linear-gradient(180deg,#0f1f1b,#071815);padding:16px;border-radius:8px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.03)}
-.charts .row{display:flex;gap:12px}
-.row .card.small{flex:1}
-#player-list,#players-list-simple{list-style:none;padding:0;margin:0;color:var(--muted)}
-#player-list li,#players-list-simple li{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.03)}
-.panel label{display:block;margin:8px 0;color:var(--muted)}
-.uma{display:flex;gap:8px;align-items:center}
-.uma-in{width:72px;padding:6px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--cream)}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-.table,table{width:100%;border-collapse:collapse;color:var(--cream)}
-.score-table th, .score-table td, .result-table th, .result-table td{padding:8px;border:1px solid rgba(255,255,255,0.04);text-align:center}
-.match-actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
-.footer{max-width:1100px;margin:8px auto;padding:10px;color:var(--muted);text-align:center}
-input[type="text"],input[type="number"],select,input[type="datetime-local"]{padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--cream)}
-.player-checkbox{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow:auto}
+
+/* ======= ベース ======= */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* ======= ヘッダー ======= */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: 12px 18px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.02), transparent),
+    rgba(0,0,0,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  backdrop-filter: blur(2px);
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  margin-right: 8px;
+  text-decoration: none;
+}
+
+.header nav {
+  margin-left: auto; /* ← 追加：nav を右に押し出す */
+  display: flex;
+  gap: 12px;
+}
+
+.header nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+
+.header nav a.active,
+.header nav a:hover {
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* ======= レイアウト共通 ======= */
+main {
+  padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page {
+  padding: var(--padding) 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ======= パネル（カード） ======= */
+.panel {
+  background: linear-gradient(180deg, var(--panel-bg), #0e1a18);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 6px 18px var(--card-shadow);
+  padding: 16px;
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
+/* 小見出しの下線アクセント */
+.h-underline {
+  display: inline-block;
+  position: relative;
+  padding-bottom: 6px;
+}
+.h-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 3px;
+  width: 60%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.95;
+}
+
+/* ======= ボタン ======= */
+.button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.4);
+  background: linear-gradient(#2f9d4a, var(--accent-2));
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04);
+  font-weight: 600;
+}
+
+.button.ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.04);
+  color: var(--muted);
+}
+
+.button:active { transform: translateY(1px); }
+
+/* ======= テーブル ======= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  background: transparent;
+  color: var(--text);
+}
+
+th, td {
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.03);
+  text-align: left;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+thead th {
+  background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* 行の分割や強調 */
+tbody tr + tr td { border-top: 1px solid rgba(255,255,255,0.02); }
+.row-muted { color: var(--muted); }
+
+/* ======= フォーム要素 ======= */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.08));
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+/* ======= プレイヤー選択 等 ======= */
+#player-select-wrap button {
+  margin: 4px;
+}
+
+/* ======= スタッツ表示 ======= */
+.stats {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.stat-card {
+  flex: 1;
+  padding: 12px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border: 1px solid rgba(255,255,255,0.03);
+  text-align: center;
+}
+
+.stat-number { font-size: 1.6rem; font-weight: 700; color: var(--text); }
+.stat-label { color: var(--muted); font-size: 0.9rem; }
+
+/* ======= グラフ / 円グラフ等のパネル内要素想定 ======= */
+.chart-area {
+  height: 220px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+/* ======= 色による強調 ======= */
+.is-positive { color: #9ff09a; font-weight: 700; }  /* 利益等 */
+.is-negative { color: #ff8b7a; font-weight: 700; }  /* 損失等 */
+.is-accent   { color: var(--accent); font-weight: 700; }
+
+/* ハイライト用バッジ */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.06));
+  border: 1px solid rgba(255,255,255,0.02);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ======= 対局アクション系 ======= */
+.rule-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.match-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ======= フッター ======= */
+.footer {
+  padding: 12px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05), transparent);
+  color: var(--muted);
+  font-size: 0.95rem;
+  border-top: 1px solid rgba(255,255,255,0.02);
+}
+
+/* ======= レスポンシブ（簡易） ======= */
+@media (max-width: 800px) {
+  main { padding: 12px; }
+  .stats { flex-direction: column; }
+  .header { padding: 10px; }
+  .brand { font-size: 1.05rem; }
+}
+
+/* ===========================
+   追加メモ（クラスの使い方）
+   - 重要なボタン: .button
+   - パネル: .panel
+   - 数値強調: .is-positive / .is-negative / .is-accent
+   - グラフ領域: .chart-area
+   =========================== */
+   /* ダッシュボード上部のカード行 */
+.dashboard-top{
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.stat-card{
+  flex: 1;
+  min-width: 140px;
+  padding: 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border: 1px solid rgba(255,255,255,0.03);
+  text-align: center;
+}
+.stat-number{ font-size: 1.8rem; font-weight: 800; margin-top: 6px; }
+
+/* 新規対局ボタンを右寄せに見せる */
+.button-new{
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  align-self: stretch;
+  height: 48px;
+}
+
+/* ダッシュボードの2カラムグリッド（左メイン・右サイド） */
+.dashboard-grid{
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* 左カラム内は縦に並べる */
+.left-column{ display: flex; flex-direction: column; gap: 20px; }
+
+/* 右カラムのサイドバー */
+.right-column{ display: flex; flex-direction: column; gap: 16px; }
+
+/* パネル内要素の細かい調整 */
+.panel-chart{ padding-bottom: 18px; }
+.panel-distribution .panel-rows{ margin-top: 12px; }
+
+/* テーブルを暗めのカード内で見やすく */
+.match-table th, .match-table td{
+  border-color: rgba(255,255,255,0.02);
+  background: transparent;
+}
+
+/* 小画面対応：右カラムが下に回る */
+@media (max-width: 980px){
+  .dashboard-grid{ grid-template-columns: 1fr; }
+  .button-new{ width: 100%; }
+}
+
+/* players ページ（ダークテーマ寄せ）*/
+#players .panel {
+  max-width: 820px;
+  margin: 24px auto;
+  padding: 18px;
+  background: linear-gradient(180deg,#0f1724,#0b1220);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(2,6,23,0.6);
+  color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* 見出し */
+#players .panel h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #f7fbff;
+  opacity: 0.95;
+}
+
+/* 入力行 */
+.player-entry {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.player-entry input[type="text"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: box-shadow .15s, border-color .15s;
+}
+.player-entry input[type="text"]::placeholder { color: rgba(255,255,255,0.45); }
+.player-entry input[type="text"]:focus {
+  border-color: rgba(107,139,255,0.9);
+  box-shadow: 0 6px 18px rgba(75,95,255,0.12);
+  background: rgba(255,255,255,0.02);
+}
+.player-entry button {
+  padding: 10px 14px;
+  background: linear-gradient(180deg,#4e63e6,#394ee0);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(40,55,160,0.22);
+}
+.player-entry button:active { transform: translateY(1px); }
+
+/* 簡易リスト */
+#players-list-simple {
+  list-style: none;
+  padding: 8px;
+  margin: 6px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+#players-list-simple li {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 12px;
+  border-radius: 8px;
+  cursor: default;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #fff;
+  transition: transform .08s ease, box-shadow .12s ease, background .12s;
+  position: relative;
+}
+#players-list-simple li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+}
+
+/* 右クリック削除のヒント */
+#players-list-simple li::after{
+  content: "右クリックで削除";
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  opacity: 0;
+  transition: opacity .12s;
+}
+#players-list-simple li:hover::after { opacity: 1; }
+
+/* player-checkbox（チェックボックスラップ） */
+.player-checkbox { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.player-checkbox label {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+}
+.player-checkbox input[type="checkbox"] { accent-color: #6b8cff; }
+
+/* ghost ボタン（ダーク用） */
+.button.ghost {
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.9);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* モバイル調整 */
+@media (max-width: 520px){
+  #players .panel { margin: 12px; padding: 14px; }
+  #players-list-simple { grid-template-columns: 1fr; }
+  .player-entry button { padding: 10px; }
+}
+
+/* 新規対局パネル用（追記） */
+.page {
+    padding: 16px; 
+}
+.panel { 
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius:6px; 
+    padding:12px; 
+    background: linear-gradient(180deg,#14221f,#0e1a18); 
+    max-width:900px; 
+}
+.player-checkbox { 
+    display:flex; 
+    flex-wrap:wrap; 
+    gap:8px; 
+    margin-top:12px; 
+}
+.player-checkbox label { 
+    background: rgba(255,255,255,0.02); 
+    border:1px solid rgba(255,255,255,0.06); 
+    padding:6px 8px; 
+    border-radius:8px; 
+    display:flex; 
+    align-items:center; 
+    gap:8px; 
+    color:#fff; 
+}
+.panel h3 { 
+    margin:0 0 8px 0; 
+}
+.panel input[type=number] { 
+    padding:4px; 
+    width:100px; 
+}
+#players-choose { 
+    margin-top:8px; 
+}
+#start-record, #cancel-new { 
+    padding:8px 10px; 
+    margin-right:8px; 
+    border-radius:6px; 
+}
+
+/* newMatch panel — 可読性を高めた版（このブロックで置換してください） */
+
+#newMatch {
+  /* パネル上部の余白 */
+  padding-top: 12px;
+}
+
+/* 中央寄せのカードパネル */
+#newMatch .panel {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* プレイヤー選択チェックボックスのグリッド */
+.player-checkbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 各プレイヤーラベル（チェックボックスを含む） */
+.player-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+/* newMatch: ルール決めページ向けスタイル改善（このブロックを style.css に追記／置換してください） */
+
+/* 全体レイアウト調整 */
+#newMatch .panel {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 18px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  color: var(--text, #eaeff0);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* 見出し */
+#newMatch .panel h3 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* カラムレイアウト（左: プレイヤー / 右: ルール） */
+#newMatch .panel .flex {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+#newMatch .panel .col-left {
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+#newMatch .panel .col-right {
+  min-width: 320px;
+  flex: 1 1 420px;
+}
+
+/* 小見出し */
+#newMatch .panel h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text, #eaeff0);
+}
+
+/* プレイヤー選択 */
+.player-checkbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.player-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  color: var(--text, #fff);
+  font-size: 0.95rem;
+}
+
+/* フォーム行（ラベル＋コントロール） */
+.nm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.nm-row label {
+  min-width: 120px;
+  color: var(--text, #eaeff0);
+  font-size: 0.95rem;
+}
+
+/* 入力・セレクトの見た目 */
+#newMatch input[type="number"],
+#newMatch select {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  /* color: #000;   */
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  min-width: 140px;
+}
+
+/* select 要素内の option の色指定（ブラウザにより制限あり） */
+#newMatch select option {
+  color: #000;               /* ドロップダウン内のテキストを黒に */
+  background: #fff;
+}
+
+/* ウマ入力群の横並び調整 */
+.uma-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.uma-group input[type="number"] {
+  width: 72px;
+  min-width: 72px;
+  text-align: center;
+}
+
+/* レートのスタイル調整 */
+#newMatch .rate-select {
+  background-color: #2a2a2a; /* 背景色をボタンと合わせる */
+  color: #ffffff; /* テキストを白に */
+  border: 1px solid #444444; /* ボーダーを少し明るく */
+  padding: 8px; /* 余白を追加 */
+  border-radius: 6px; /* 角を丸く */
+}
+
+/* ドロップダウンのオプションのスタイル */
+#newMatch .rate-select option {
+  background-color: #1e1e1e; /* オプションの背景色 */
+  color: #ffffff; /* オプションの文字色を白に */
+}
+
+/* オプションのホバー時のスタイル */
+#newMatch .rate-select option:hover {
+  background-color: #2a2a2a; /* ホバー時の背景色 */
+  color: #ffffff; /* ホバー時の文字色を白に */
+}
+
+/* フォーカス時のスタイル */
+#newMatch .rate-select:focus {
+  outline: none; /* デフォルトのアウトラインを削除 */
+  border: 1px solid #ffffff; /* フォーカス時のボーダーを明るく */
+}
+
+/* style.css の末尾に追記 */
+
+/* --- 対局記録ページ (#match) --- */
+#match .panel {
+  max-width: 700px;
+  margin: 20px auto;
+}
+
+#match .match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 12px;
+}
+
+#match .match-rules-summary {
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: right;
+}
+#match .match-rules-summary span {
+  display: block;
+}
+#match .match-rules-summary b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+#match .score-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+#match .player-score-input label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+
+#match .player-score-input input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1.1rem;
+}
+
+#match .actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+#match .actions .button {
+  flex: 1;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+#match .actions .button.next {
+  background: linear-gradient(#2f9d4a, var(--accent-2));
+}
+
+#match .actions .button.end {
+  background: linear-gradient(#d34c4c, #b53a3a);
+}
+/* style.css の末尾に追記 */
+
+/* --- 「途中結果」ボタンの色 --- */
+#match .actions .button.intermediate {
+  background: linear-gradient(#4a7bd8, #3a62b8);
+}
+
+/* --- 途中結果ページ --- */
+#intermediate-result .panel {
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+#intermediate-result .actions {
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* --- 途中結果テーブルのスタイル --- */
+#intermediate-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+#intermediate-table-container th,
+#intermediate-table-container td {
+  border: 1px solid var(--panel-border);
+  padding: 10px;
+  text-align: center;
+}
+#intermediate-table-container th {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+#intermediate-table-container .total-row td {
+  font-weight: bold;
+  font-size: 1.1em;
+  background-color: rgba(47, 166, 74, 0.2);
+}
+#intermediate-table-container .positive { 
+    color: #9ff09a; 
+}
+#intermediate-table-container .negative {
+    color: #ff8b7a;
+}
+/* 日付入力のカレンダーアイコンを白くする */
+#rule-date {
+  color-scheme: dark;
+}
+
+/* style.css の末尾にこれを追加 */
+
+/* --- Chip Settle Modal --- */
+#chip-settle-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100; /* 他の要素より手前に表示 */
+}
+
+#chip-settle-page .panel {
+  max-width: 500px;
+  width: 90%;
+}
+
+.chip-inputs-grid {
+  margin: 1.5rem 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.chip-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chip-input-row label {
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.chip-input-row input {
+  width: 120px;
+  text-align: right;
+}
