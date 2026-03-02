@@ -181,7 +181,45 @@
       </div>
     </section>
 
+    <!-- ===== Records Page ===== -->
+    <section id="records-page" class="page hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>対局記録</h3>
+          <button id="records-close-btn" class="button ghost small">閉じる</button>
+        </div>
+        
+        <!-- 記録がここにリスト表示されます -->
+        <ul id="records-list" class="records-list-container">
+          <!-- 例: 
+          <li>
+            <div>日付とプレイヤー</div>
+            <div>ボタン</div>
+          </li>
+          -->
+        </ul>
+      </div>
+    </section>
 
+
+    <section id="record-detail-page" class="page hidden">
+    <div class="panel">
+        <div class="panel-header">
+        <h2>対局詳細</h2>
+        <button id="record-detail-close-btn" class="button">記録一覧へ戻る</button>
+        </div>
+        <div class="panel-body">
+        <!-- ここにサマリー情報が動的に挿入される -->
+        <div id="record-detail-summary"></div>
+        
+        <hr>
+        
+        <h3>ラウンド毎の結果</h3>
+        <!-- ここにラウンドごとのテーブルが動的に挿入される -->
+        <div id="record-detail-rounds"></div>
+        </div>
+    </div>
+    </section>
 
 
 

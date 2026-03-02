@@ -2,15 +2,20 @@
   console.log('app.js: newMatch full features loaded');
   document.addEventListener('DOMContentLoaded', () => {
     // --- Element refs ---
+    const recordDetailPage = document.getElementById('record-detail-page');
+    const recordDetailSummary = document.getElementById('record-detail-summary');
+    const recordDetailRounds = document.getElementById('record-detail-rounds');
+    const recordDetailCloseBtn = document.getElementById('record-detail-close-btn');
+    
     const pages = {
       home: document.getElementById('home'),
       newMatch: document.getElementById('newMatch'),
       match: document.getElementById('match'),
       result: document.getElementById('result'),
       players: document.getElementById('players'),
-      match: document.getElementById('match'),
       intermediateResult: document.getElementById('intermediate-result'),
-      chipSettle: document.getElementById('chip-settle-page')
+      chipSettle: document.getElementById('chip-settle-page'),
+      recordDetail: recordDetailPage
     };
     let pointInputs = [];
     let chipInputs = [];  
@@ -72,6 +77,9 @@
     const chipInputsContainer = document.getElementById('chip-inputs-container');
     const confirmChipSettleBtn = document.getElementById('confirm-chip-settle');
     const cancelChipSettleBtn = document.getElementById('cancel-chip-settle');
+    
+
+   
     // --- Storage keys ---
     const PLAYERS_KEY = 'jan_players_v1';
     const RECORDS_KEY = 'jan_records_v1';
@@ -184,6 +192,7 @@
         ret: Number((ruleReturn && ruleReturn.value) || 30000),
         uma: umaInputs.map(i => Number((i && i.value) || 0)),
         chipRate: Number((chipRateInput && chipRateInput.value) || 100),
+        rate: Number(rateSelect.value)
     };
     
     currentSession = { meta, players: chosen.slice(), rounds: [] };
@@ -215,6 +224,188 @@
         showPage('match'); // 対局画面に戻る
     });
 
+
+        // ...
+    // チップ入力画面の「キャンセル」ボタン
+    cancelChipSettleBtn && cancelChipSettleBtn.addEventListener('click', () => {
+        showPage('match'); // 対局画面に戻る
+    });
+
+    // ▲▲▲ ここまでが目印 ▲▲▲
+
+    // ▼▼▼ ここから、以下のコードブロックを丸ごと貼り付け ▼▼▼
+
+    // ===================================================
+    // ===== 対局記録ページ関連の処理 (ここから) =====
+    // ===================================================
+
+    // --- 1. 要素の参照 ---
+    const recordsPage = document.getElementById('records-page');
+    const recordsList = document.getElementById('records-list');
+    const recordsCloseBtn = document.getElementById('records-close-btn');
+
+    // --- 2. pages オブジェクトへの追加 ---
+    // ※ pages の定義がこれより上にあることを確認してください
+    if (pages) {
+        pages.records = recordsPage;
+    }
+
+    /**
+ * 記録ページをレンダリング（描画）する
+ */
+    function renderRecordsPage() {
+        if (!recordsList) return;
+        recordsList.innerHTML = '';
+
+        if (records.length === 0) {
+            recordsList.innerHTML = '<p>まだ対局記録がありません。</p>';
+            return;
+        }
+
+        records.forEach(rec => {
+            // ▼▼▼ ここから修正 ▼▼▼
+
+            const playersHtml = (rec.players || [])
+                // ソート処理をより安全に
+                .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0))
+                .map(p => {
+                    // finalScoreが存在し、かつ数値であるかをチェック
+                    const scoreValue = typeof p.finalScore === 'number' ? p.finalScore : 0;
+                    const score = scoreValue.toFixed(2); // 安全な値に対して .toFixed を実行
+
+                    const scoreClass = scoreValue > 0 ? 'score-positive' : (scoreValue < 0 ? 'score-negative' : '');
+                    return `<li><span>${escapeHtml(p.name)}</span> <span class="${scoreClass}">${score}</span></li>`;
+                })
+                .join('');
+
+            // ▲▲▲ 修正ここまで ▲▲▲
+
+            const li = document.createElement('li');
+            li.className = 'record-item';
+            li.innerHTML = `
+                <div class="record-header">
+                    <span class="record-date">${new Date(rec.created).toLocaleString()}</span>
+                </div>
+                <ul class="record-players">
+                    ${playersHtml}
+                </ul>
+                <div class="record-actions">
+                    <button class="button ghost small detail-record-btn" data-id="${rec.id}">詳細</button>
+                    <button class="button danger small delete-record-btn" data-id="${rec.id}">削除</button>
+                </div>
+            `;
+            recordsList.appendChild(li);
+        });
+    }
+
+        // app.js にこの新しい関数を丸ごと追加
+
+    /**
+     * 特定の対局記録の詳細ページを生成・表示する
+     * @param {object} record 表示する記録オブジェクト
+     */
+    function renderRecordDetailPage(record) {
+        if (!record || !recordDetailSummary || !recordDetailRounds) return;
+
+        // 1. サマリー部分を生成 (最終スコアとチップ枚数)
+        const summaryHtml = (record.players || [])
+            .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0))
+            .map(p => {
+                const score = (p.finalScore || 0).toFixed(2);
+                const scoreClass = p.finalScore > 0 ? 'score-positive' : (p.finalScore < 0 ? 'score-negative' : '');
+                const chipCount = p.chipCount || 0;
+                return `
+                    <div class="summary-player-row">
+                        <span class="player-name">${escapeHtml(p.name)}</span>
+                        <div class="player-scores">
+                            <span class="final-score ${scoreClass}">${score}</span>
+                            <span class="chip-count">チップ: ${chipCount}枚</span>
+                        </div>
+                    </div>
+                `;
+            })
+            .join('');
+        recordDetailSummary.innerHTML = summaryHtml;
+
+        // 2. ラウンド毎の結果テーブルを生成
+        let roundsTableHtml = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>対局</th>
+                        <th>${escapeHtml(record.players[0].name)}</th>
+                        <th>${escapeHtml(record.players[1].name)}</th>
+                        <th>${escapeHtml(record.players[2].name)}</th>
+                        <th>${escapeHtml(record.players[3].name)}</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        (record.rounds || []).forEach((round, index) => {
+            roundsTableHtml += `<tr><td>${index + 1}</td>`;
+            (round.points || [0,0,0,0]).forEach(point => {
+                const displayPoint = (point / 1000).toFixed(2);
+                const className = displayPoint > 0 ? 'positive' : (displayPoint < 0 ? 'negative' : '');
+                roundsTableHtml += `<td class="${className}">${displayPoint}</td>`;
+            });
+            roundsTableHtml += `</tr>`;
+        });
+        roundsTableHtml += `</tbody></table>`;
+        recordDetailRounds.innerHTML = roundsTableHtml;
+    }
+
+    // --- 4. イベントリスナー ---
+    // 記録ページの「閉じる」ボタン
+    recordsCloseBtn?.addEventListener('click', () => showPage('home'));
+
+ 
+
+    // (app.js のイベントリスナーセクション)
+
+    // 記録リスト内のボタンに対するイベント処理を修正
+    recordsList?.addEventListener('click', e => {
+        const target = e.target;
+        const recordId = target.dataset.id;
+        if (!recordId) return;
+
+        // 「削除」ボタンが押された場合
+        if (target.classList.contains('delete-record-btn')) {
+            if (confirm('この対局記録を本当に削除しますか？この操作は元に戻せません。')) {
+                records = records.filter(rec => rec.id !== recordId);
+                saveRecords();
+                renderRecordsPage();
+            }
+        } 
+        // 「詳細」ボタンが押された場合
+        else if (target.classList.contains('detail-record-btn')) {
+            const record = records.find(r => r.id === recordId);
+            if (record) {
+                renderRecordDetailPage(record);
+                showPage('recordDetail');
+            }
+        }
+    });
+
+    // ▼▼▼ この新しいイベントリスナーを追加 ▼▼▼
+    // 詳細ページの「戻る」ボタン
+    recordDetailCloseBtn?.addEventListener('click', () => showPage('records'));
+
+
+    // ===================================================
+    // ===== 対局記録ページ関連の処理 (ここまで) =====
+    // ===================================================
+
+
+    // --- Navigation & init (7) ---
+    // ▼▼▼ ここから下がナビゲーションのブロック ▼▼▼
+    navHome?.addEventListener('click', e => { e.preventDefault(); showPage('home'); renderHome(); });
+    navRecords?.addEventListener('click', e => { 
+        e.preventDefault(); 
+        renderRecordsPage(); // 記録ページを生成
+        showPage('records');   // 記録ページを表示
+    });
+    // navRecordsの処理は、この下の完成版に差し替えます
+    // ...
 
     // --- Match UI & live compute (2) ---
     function renderMatchUI(){
@@ -296,35 +487,7 @@
       alert('この対局を保存しました。次の対局を入力してください（終了する場合は「チップ精算をして対戦終了」を押してください）');
     });
 
-    // --- Chip settle & final save (4) ---
-    chipSettleBtn && chipSettleBtn.addEventListener('click', () => {
-      if(!currentSession) return;
-      if(currentSession.rounds.length === 0){
-        if(!confirm('まだ1局も保存されていません。本当に終了して保存しますか？')) return;
-      }
-      // prompt final chips
-      const finalChips = currentSession.players.map(p => {
-        const val = prompt(`${p} の最終チップ差（枚数）を入力してください（例: 3 または -2）`, '0');
-        return Number(val || 0);
-      });
-      // sum rounds
-      const sums = currentSession.players.map(()=>0);
-      currentSession.rounds.forEach(r => r.points.forEach((pt,i)=>sums[i]+=pt));
-      const finalPoints = sums.map((v,i)=> v + (finalChips[i]||0) * currentSession.meta.chipRate);
-      const rec = {
-        id: 'rec_' + Date.now(),
-        meta: currentSession.meta,
-        players: currentSession.players.map((name,i)=>({ name, totalPoints: finalPoints[i], chipFinal: finalChips[i]||0 })),
-        rounds: currentSession.rounds,
-        created: new Date().toISOString()
-      };
-      records.unshift(rec);
-      saveRecords();
-      alert('対局を保存しました。結果表示に移行します。');
-      showResult(rec);
-      currentSession = null;
-      showPage('home');
-    });
+    
 
     // --- Result show (5) ---
     function showResult(rec){
@@ -509,10 +672,16 @@
             }
         });
 
-        // 3. チップ点を加算して最終スコアを計算
+            // 3. レートとチップを考慮して最終スコアを計算
         const finalScores = totalPoints.map((point, index) => {
-            const chipPoints = (finalChips[index] || 0) * currentSession.meta.chipRate;
-            return (point + chipPoints) / 1000;
+            // ラウンドポイントにレートを掛ける
+            const roundScore = point * currentSession.meta.rate;
+
+            // チップ枚数にチップレートを掛ける
+            const chipScore = (finalChips[index] || 0) * currentSession.meta.chipRate;
+
+            // 2つを合算したものが最終スコアとなる
+            return roundScore + chipScore;
         });
 
         // 4. 最終的な記録オブジェクトを作成
@@ -606,8 +775,16 @@
 
     // --- Navigation & init (7) ---
     navHome?.addEventListener('click', e => { e && e.preventDefault(); showPage('home'); renderHome(); });
-    navRecords?.addEventListener('click', e => { e && e.preventDefault(); alert('対局記録（未実装の詳細表示）'); });
+    
+    
     navPlayers?.addEventListener('click', e => { e && e.preventDefault(); showPage('players'); renderPlayersUI(); });
+    
+    
+
+    
+
+    
+    
     navSettings?.addEventListener('click', e => { e && e.preventDefault(); alert('設定（未実装）'); });
     btnNew?.addEventListener('click', ()=> { showPage('newMatch'); renderPlayersUI(); });
     cancelNew?.addEventListener('click', ()=> showPage('home'));
@@ -619,6 +796,9 @@
     showPage('home');
   });
     
+  // app.js に以下の関数を追加
+
+   
 
         // 1) ボタン取得のフォールバックを追加してイベントを確実にバインド
     const btnNew = document.getElementById('btn-new') || document.querySelector('.button-new');

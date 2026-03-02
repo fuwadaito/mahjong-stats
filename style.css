@@ -828,3 +828,182 @@ select {
   width: 120px;
   text-align: right;
 }
+
+
+
+.record-item {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.record-date {
+  font-size: 0.9em;
+  color: #555;
+  font-weight: bold;
+}
+
+.record-players {
+  list-style: none;
+  padding: 0;
+  font-size: 1.1em;
+}
+
+.record-players li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+.record-players li:last-child {
+  border-bottom: none;
+}
+
+.record-players .score-positive {
+  color: #1a73e8;
+  font-weight: bold;
+}
+.record-players .score-negative {
+  color: #d93025;
+}
+
+.record-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* style.css の末尾にこれを追加 */
+
+.record-players li span:first-child {
+  /* プレイヤー名のspan要素（リストの最初のspan）に適用 */
+  color: #333; /* 文字色を濃い灰色に指定 */
+  font-weight: 500; /* 少しだけ太字にして見やすくする */
+}
+
+/* style.css にこれを追加 */
+
+#records-page .panel {
+  max-width: 650px; /* パネルの最大横幅を650pxに制限 */
+  margin: 2rem auto;  /* 上下に余白を設け、左右を自動調整して中央寄せ */
+}
+
+/* style.css の末尾にこれを追加 */
+
+/* 記録カード内のゴーストボタン（詳細ボタンなど）のスタイル調整 */
+.record-actions .button.ghost {
+  color: #666; /* 文字色を読みやすいミディアムグレーに */
+  border-color: #bbb; /* 枠線の色も少し濃くして視認性を上げる */
+}
+
+/* マウスを乗せた時のスタイル */
+.record-actions .button.ghost:hover {
+  background-color: #e9e9e9; /* 背景に薄いグレーを表示 */
+  color: #111; /* 文字色をさらに濃くして、選択されていることを示す */
+}
+
+/* style.css の末尾にこれを追加 */
+
+/* --- Record Detail Page --- */
+#record-detail-page .panel {
+  max-width: 800px; /* 少し幅広に */
+  margin: 2rem auto;
+}
+
+
+.summary-player-row:last-child {
+  border-bottom: none;
+}
+
+/* style.css の Record Detail Page セクションを以下に置き換え */
+
+.summary-player-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.summary-player-row .player-name {
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+/* スコアとチップのコンテナ */
+.summary-player-row .player-scores {
+  display: flex;
+  flex-direction: column; /* 要素を縦に並べる */
+  align-items: flex-end;   /* 右揃えにする */
+}
+
+/* メインとなる最終スコアのスタイル */
+.summary-player-row .final-score {
+  font-weight: bold;
+  font-size: 1.8em; /* 文字を大幅に大きくする */
+  line-height: 1.1;
+}
+
+/* 補足情報となるチップ枚数のスタイル */
+.summary-player-row .chip-count {
+  font-size: 0.9em; /* 文字を小さくする */
+  color: #444;       /* 色を少し薄くして控えめにする */
+  margin-top: 4px;  /* スコアとの間に少し余白を設ける */
+}
+
+
+
+#record-detail-rounds table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+#record-detail-rounds th,
+#record-detail-rounds td {
+  padding: 0.6rem;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+#record-detail-rounds th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+#record-detail-rounds td:first-child {
+  font-weight: bold;
+}
+
+/* 途中結果のテーブルと共通のスタイル */
+.positive { color: #155724; }
+.negative { color: #721c24; }
+
+/* style.css の末尾に追加、または既存のスタイルをこれで上書き */
+
+/* --- カラーコントラストの改善 --- */
+
+/* チップ枚数の文字色を濃くする */
+.summary-player-row .chip-count {
+  color: #eee; /* 十分に濃いグレーに変更 */
+}
+
+/* プラススコアの文字色を、より明るくはっきりした緑に変更 */
+.positive {
+  color: #28a745; 
+}
+
+/* マイナススコアの文字色を、より認識しやすい赤に変更 */
+.negative {
+  color: #dc3545;
+}
