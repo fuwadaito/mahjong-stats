@@ -307,27 +307,8 @@
     function renderRecordDetailPage(record) {
         if (!record || !recordDetailSummary || !recordDetailRounds) return;
 
-        // 1. サマリー部分を生成 (最終スコアとチップ枚数)
-        const summaryHtml = (record.players || [])
-            .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0))
-            .map(p => {
-                const score = (p.finalScore || 0).toFixed(2);
-                const scoreClass = p.finalScore > 0 ? 'score-positive' : (p.finalScore < 0 ? 'score-negative' : '');
-                const chipCount = p.chipCount || 0;
-                return `
-                    <div class="summary-player-row">
-                        <span class="player-name">${escapeHtml(p.name)}</span>
-                        <div class="player-scores">
-                            <span class="final-score ${scoreClass}">${score}</span>
-                            <span class="chip-count">チップ: ${chipCount}枚</span>
-                        </div>
-                    </div>
-                `;
-            })
-            .join('');
-        recordDetailSummary.innerHTML = summaryHtml;
+        recordDetailSummary.innerHTML = ''; // サマリー表示を完全に削除
 
-        // 2. ラウンド毎の結果テーブルを生成
         let roundsTableHtml = `
             <table>
                 <thead>
@@ -341,6 +322,7 @@
                 </thead>
                 <tbody>
         `;
+        // 各ラウンドの行を追加
         (record.rounds || []).forEach((round, index) => {
             roundsTableHtml += `<tr><td>${index + 1}</td>`;
             (round.points || [0,0,0,0]).forEach(point => {
@@ -350,6 +332,26 @@
             });
             roundsTableHtml += `</tr>`;
         });
+
+        // ▼▼▼ [変更点1] チップ枚数に色付け用のクラスを追加 ▼▼▼
+        roundsTableHtml += `<tr class="chip-total-row"><td>チップ</td>`;
+        record.players.forEach(player => {
+            const chipCount = player.chipCount || 0;
+            const className = chipCount > 0 ? 'positive' : (chipCount < 0 ? 'negative' : '');
+            roundsTableHtml += `<td class="${className}">${chipCount}</td>`;
+        });
+        roundsTableHtml += `</tr>`;
+
+        // ▼▼▼ [変更点2] 最終ポイントにも同じクラス名ルールを適用 ▼▼▼
+        roundsTableHtml += `<tr class="final-score-row"><td>ポイント</td>`;
+        record.players.forEach(player => {
+            const score = (player.finalScore || 0);
+            const scoreText = score.toFixed(2);
+            const className = score > 0 ? 'positive' : (score < 0 ? 'negative' : '');
+            roundsTableHtml += `<td class="${className}">${scoreText}</td>`;
+        });
+        roundsTableHtml += `</tr>`;
+
         roundsTableHtml += `</tbody></table>`;
         recordDetailRounds.innerHTML = roundsTableHtml;
     }
@@ -790,13 +792,127 @@
     cancelNew?.addEventListener('click', ()=> showPage('home'));
     if(headerLogo) headerLogo.addEventListener('click', e=>{ e && e.preventDefault(); showPage('home'); renderHome(); });
 
+
+    // ===================================================
+    // ===== ダッシュボード機能 (プルダウンメニュー版) =====
+    // ===================================================
+    function initializeDashboard() {
+        const container = document.getElementById('player-selector-container');
+        if (!container) return;
+
+        const allRecords = JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]');
+        const playerNames = players; // グローバルスコープのplayers配列を参照
+
+        /**
+         * 特定のプレイヤーのダッシュボード統計を計算して表示する
+         * (この関数の内部ロジックは前回から変更ありません)
+         */
+        function updateDashboard(playerName) {
+            if (!playerName) return;
+            const totalGamesEl = document.getElementById('total-games');
+            const avgRankEl = document.getElementById('avg-rank');
+            const lastRateEl = document.getElementById('last-rate');
+            const totalBalanceEl = document.getElementById('total-balance');
+            const playerRecords = allRecords.filter(rec => rec.players.some(p => p.name === playerName));
+            const totalGames = playerRecords.length;
+            totalGamesEl.textContent = totalGames;
+
+            if (totalGames === 0) {
+                avgRankEl.textContent = 'N/A';
+                lastRateEl.textContent = 'N/A';
+                totalBalanceEl.textContent = '0';
+                return;
+            }
+
+            let totalRank = 0, lastPlaceCount = 0, totalBalance = 0;
+            playerRecords.forEach(rec => {
+                const sortedPlayers = [...rec.players].sort((a, b) => b.finalScore - a.finalScore);
+                const myResult = sortedPlayers.find(p => p.name === playerName);
+                if (myResult) {
+                    const rank = sortedPlayers.indexOf(myResult) + 1;
+                    totalRank += rank;
+                    if (rank === 4) lastPlaceCount++;
+                    totalBalance += myResult.finalScore;
+                }
+            });
+            avgRankEl.textContent = (totalRank / totalGames).toFixed(2);
+            const lastAvoidRate = (1 - (lastPlaceCount / totalGames)) * 100;
+            lastRateEl.textContent = `${lastAvoidRate.toFixed(1)}%`;
+            totalBalanceEl.textContent = `${totalBalance >= 0 ? '+' : ''}${totalBalance.toFixed(0)}`;
+            totalBalanceEl.className = 'stat-number';
+            if (totalBalance > 0) totalBalanceEl.classList.add('is-positive');
+            if (totalBalance < 0) totalBalanceEl.classList.add('is-negative');
+        }
+
+        // --- プルダウンメニューのHTML構造を生成 ---
+        container.innerHTML = ''; // まずは中身を空にする
+
+        if (playerNames.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #888;">プレイヤーを登録すると成績が表示されます。</p>';
+            return;
+        }
+
+        // メニュー全体のラッパー
+        const selectorDiv = document.createElement('div');
+        selectorDiv.className = 'player-selector';
+
+        // 常に表示される部分 (現在選択中のプレイヤー)
+        const currentDiv = document.createElement('div');
+        currentDiv.className = 'player-selector-current';
+        currentDiv.textContent = playerNames[0]; // 初期値は最初のプレイヤー
+        
+        // プレイヤーリスト
+        const listDiv = document.createElement('div');
+        listDiv.className = 'player-selector-list';
+
+        playerNames.forEach(name => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'player-selector-item';
+            itemDiv.textContent = name;
+            itemDiv.dataset.player = name;
+            listDiv.appendChild(itemDiv);
+        });
+
+        selectorDiv.appendChild(currentDiv);
+        selectorDiv.appendChild(listDiv);
+        container.appendChild(selectorDiv);
+
+        // --- イベントリスナーを設定 ---
+
+        // 1. 現在のプレイヤー名部分をクリックしたら、リストを開閉する
+        currentDiv.addEventListener('click', () => {
+            listDiv.classList.toggle('open');
+        });
+
+        // 2. リスト内のプレイヤー名をクリックしたら
+        listDiv.addEventListener('click', (event) => {
+            if (event.target.classList.contains('player-selector-item')) {
+                const selectedPlayer = event.target.dataset.player;
+                currentDiv.textContent = selectedPlayer; // 表示を更新
+                updateDashboard(selectedPlayer);         // ダッシュボードを更新
+                listDiv.classList.remove('open');        // リストを閉じる
+            }
+        });
+        
+        // 3. メニューの外側をクリックしたら、リストを閉じる (おまけ機能)
+        document.addEventListener('click', (event) => {
+            if (!selectorDiv.contains(event.target)) {
+                listDiv.classList.remove('open');
+            }
+        });
+
+        // --- 初期表示 ---
+        updateDashboard(playerNames[0]);
+    }
+
+
+
     // initial
     renderPlayersUI();
     renderHome();
+    initializeDashboard();
     showPage('home');
   });
-    
-  // app.js に以下の関数を追加
 
    
 
@@ -837,4 +953,6 @@
         }
     });
     }
+
+ 
 })();

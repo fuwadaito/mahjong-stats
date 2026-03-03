@@ -20,18 +20,28 @@
 
     <main>
     <section id="home" class="page">
-        <!-- 上部：統計カード行 -->
         <div class="dashboard-top">
         <div class="stat-card">総対局数
-    <div class="stat-number">124</div></div>
+    <div class="stat-number" id="total-games">0</div></div>
         <div class="stat-card">平均順位
-    <div class="stat-number">2.34</div></div>
+    <div class="stat-number" id="avg-rank">N/A</div></div>
         <div class="stat-card">ラス回避率
-    <div class="stat-number">78%</div></div>
-        <div class="stat-card">通算収支
-    <div class="stat-number is-positive">+30p</div></div>
+    <div class="stat-number" id="last-rate">N/A</div></div>
+        <div class="stat-card">総合収支
+    <div class="stat-number" id="total-balance">0</div></div>
         <button id="btn-new" class="button button-new">新規対局</button>
         </div>
+        
+       
+            <!-- 新しいプレイヤー選択メニューのコンテナ -->
+            <div id="player-selector-container"></div>
+        
+    
+        
+
+
+        
+
 
         <!-- 中央：メインエリア（左：大きなチャート＋履歴、右：プレイヤー情報列） -->
         <div class="dashboard-grid">
