@@ -214,9 +214,18 @@ select {
 }
 
 /* ======= 色による強調 ======= */
-.is-positive { color: #9ff09a; font-weight: 700; }  /* 利益等 */
-.is-negative { color: #ff8b7a; font-weight: 700; }  /* 損失等 */
-.is-accent   { color: var(--accent); font-weight: 700; }
+.is-positive { 
+  color: #9ff09a; 
+  font-weight: 700; 
+}  /* 利益等 */
+.is-negative { 
+  color: #ff8b7a; 
+  font-weight: 700; 
+}  /* 損失等 */
+.is-accent   { 
+  color: var(--accent); 
+  font-weight: 700; 
+}
 
 /* ハイライト用バッジ */
 .badge {
@@ -292,6 +301,7 @@ select {
   padding: 10px 14px;
   align-self: stretch;
   height: 48px;
+  width: 200px;
 }
 
 /* ダッシュボードの2カラムグリッド（左メイン・右サイド） */
@@ -1070,9 +1080,7 @@ header {
 }
 /* --- プレイヤー選択ドロップダウンのスタイル --- */
 #player-selector-container {
-  display: flex;
-  justify-content: center; /* 中央寄せ */
-  margin: 20px 0;
+  margin-top: 12px; 
 }
 
 .player-selector {
@@ -1093,7 +1101,7 @@ header {
   align-items: center;
   user-select: none; /* テキスト選択を無効化 */
   transition: border-color 0.2s;
-  width: 100px;
+  width: 200px;
   height: 40px;
 }
 .player-selector-current:hover {
@@ -1137,3 +1145,10 @@ header {
 .player-selector-item:hover {
   background-color: #233f3b;
 }
+.dashboard-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+}    
+
