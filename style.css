@@ -43,10 +43,9 @@ html, body {
   gap: var(--gap);
   padding: 12px 18px;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.02), transparent),
+    linear-gradient(180deg, rgba(255,255,255,0.02), ),
     rgba(0,0,0,0.12);
   border-bottom: 1px solid rgba(255,255,255,0.03);
-  backdrop-filter: blur(2px);
 }
 
 .brand {
@@ -278,11 +277,14 @@ select {
    - グラフ領域: .chart-area
    =========================== */
    /* ダッシュボード上部のカード行 */
-.dashboard-top{
-  display: flex;
-  gap: 16px;
-  align-items: center;
+/* ダッシュボード上部のカード行 */
+.dashboard-top {
+  display: grid;
+  /* 左4列は自動調整、右端の1列は320pxに完全固定 */
+  grid-template-columns: 1fr 1fr 1fr 1fr auto; 
+  gap: 20px;
   margin-bottom: 20px;
+  align-items: start; /* 要素の上端を揃える */
 }
 .stat-card{
   flex: 1;
@@ -301,7 +303,6 @@ select {
   padding: 10px 14px;
   align-self: stretch;
   height: 48px;
-  width: 200px;
 }
 
 /* ダッシュボードの2カラムグリッド（左メイン・右サイド） */
@@ -1040,8 +1041,8 @@ header {
   position: sticky; /* 要素を追従させる */
   top: 0;           /* 画面の最上部に固定 */
   z-index: 1000;    /* 他の要素より手前に表示 */
-  background-color: #fff; /* スクロール時に下の内容が透けないように背景色を指定 */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* スクロール時に境界がわかるように影を追加 */
+  background-color: #14221f; /* スクロール時に下の内容が透けないように背景色を指定 */
+  box-shadow: 0 2px 4px rgba(0,0,0,0); /* スクロール時に境界がわかるように影を追加 */
 }
 /* --- プレイヤータブのスタイル --- */
 .tabs-container {
@@ -1101,7 +1102,6 @@ header {
   align-items: center;
   user-select: none; /* テキスト選択を無効化 */
   transition: border-color 0.2s;
-  width: 200px;
   height: 40px;
 }
 .player-selector-current:hover {
@@ -1145,10 +1145,80 @@ header {
 .player-selector-item:hover {
   background-color: #233f3b;
 }
+/* 以前の .dashboard-actions の指定は一旦忘れ、こちらに置き換えてください */
 .dashboard-actions {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  margin-left: auto;
-}    
+  gap: 10px; /* ボタンとメニューの間の隙間 */
+  /* ここに width や margin の指定は不要です */
+}
+  
+  
 
+.dashboard-actions > * {
+  width: 100%;
+}
+/* 強制上書き：右端を中身サイズにし、グリッド内で右寄せにする */
+.dashboard-actions {
+  width: auto !important;
+  justify-self: end; /* グリッドセル内で右寄せ */
+  max-width: 320px;  /* 必要なら上限を与える（任意） */
+}
+
+/* 内部要素が親幅いっぱいに広がらないようにする */
+.dashboard-actions > * {
+  width: auto !important;
+  max-width: 100%;
+}
+
+/* 既存の固定幅を確実に無効化する（もし残っている場合） */
+.button-new,
+.player-selector-current {
+  width: auto !important;
+  min-width: 0; /* flex/grid で縮められない問題を防ぐ */
+}
+/* 左4枚を広く、右は小さく収めるレイアウト調整 */
+.dashboard-top {
+  /* 左4列は広めに、右は中身サイズにする */
+  grid-template-columns: repeat(4, 1fr) auto !important;
+}
+
+/* 右端コンテナを右寄せし、最大幅を制限 */
+.dashboard-actions {
+  justify-self: end;      /* グリッドセル内で右寄せ */
+  width: auto !important; /* auto にして中身に合わせる */
+  max-width: 220px;       /* 必要ならここで右列の最大幅を指定（調整可） */
+  gap: 10px;
+}
+
+/* 右内包要素は親幅に合わせつつ上限を守る */
+.dashboard-actions > * {
+  width: 100% !important;
+  max-width: 220px;
+  box-sizing: border-box;
+}
+
+/* 新規対局ボタンを小さめに */
+.button-new {
+  width: 160px !important;   /* 好みで 140〜200px に調整してください */
+  min-width: 0;              /* flexで縮まらない問題を防止 */
+}
+
+/* プレイヤーセレクタもボタン幅に合わせる */
+.player-selector-current {
+  width: 100% !important;
+  max-width: 160px;
+  box-sizing: border-box;
+}
+
+/* 必要ならカードの最小幅を下げてカード側を優先的に広げる */
+.stat-card {
+  min-width: 140px; /* 小さくしすぎると折り返しが発生するので注意 */
+}
+header, .header,
+header::before, header::after,
+.header::before, .header::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}

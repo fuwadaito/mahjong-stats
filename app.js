@@ -800,50 +800,81 @@
         const container = document.getElementById('player-selector-container');
         if (!container) return;
 
-        const allRecords = JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]');
+    
         const playerNames = players; // グローバルスコープのplayers配列を参照
 
-        /**
-         * 特定のプレイヤーのダッシュボード統計を計算して表示する
-         * (この関数の内部ロジックは前回から変更ありません)
-         */
         function updateDashboard(playerName) {
             if (!playerName) return;
             const totalGamesEl = document.getElementById('total-games');
             const avgRankEl = document.getElementById('avg-rank');
             const lastRateEl = document.getElementById('last-rate');
             const totalBalanceEl = document.getElementById('total-balance');
-            const playerRecords = allRecords.filter(rec => rec.players.some(p => p.name === playerName));
-            const totalGames = playerRecords.length;
-            totalGamesEl.textContent = totalGames;
+
+            const playerRecords = (records || []).filter(rec => rec.players && rec.players.some(p => p.name === playerName));
+            const totalGames = getPlayerTotalMatches(records, playerName);
+            totalGamesEl && (totalGamesEl.textContent = totalGames);
 
             if (totalGames === 0) {
-                avgRankEl.textContent = 'N/A';
-                lastRateEl.textContent = 'N/A';
-                totalBalanceEl.textContent = '0';
+                avgRankEl && (avgRankEl.textContent = 'N/A');
+                lastRateEl && (lastRateEl.textContent = 'N/A');
+                totalBalanceEl && (totalBalanceEl.textContent = '0');
                 return;
             }
 
-            let totalRank = 0, lastPlaceCount = 0, totalBalance = 0;
+            // ラウンド単位の平均順位を計算
+            let totalRounds = 0;
+            let totalRankSum = 0;
+            let lastPlaceCount = 0;
+            let totalBalance = 0;
+
             playerRecords.forEach(rec => {
-                const sortedPlayers = [...rec.players].sort((a, b) => b.finalScore - a.finalScore);
-                const myResult = sortedPlayers.find(p => p.name === playerName);
-                if (myResult) {
-                    const rank = sortedPlayers.indexOf(myResult) + 1;
-                    totalRank += rank;
-                    if (rank === 4) lastPlaceCount++;
-                    totalBalance += myResult.finalScore;
+                const playerIndex = (rec.players || []).findIndex(p => p.name === playerName);
+                if (playerIndex === -1) return;
+
+                if (Array.isArray(rec.rounds) && rec.rounds.length > 0) {
+                // 各ラウンドごとに順位を算出
+                rec.rounds.forEach(round => {
+                    const pts = round.points || round.post || [];
+                    if (!Array.isArray(pts) || pts.length === 0) return;
+                    const idxs = pts.map((v,i) => i).sort((a,b) => {
+                    if (pts[b] === pts[a]) return a - b;
+                    return pts[b] - pts[a];
+                    });
+                    const rank = idxs.indexOf(playerIndex) + 1;
+                    if (rank > 0) {
+                    totalRounds += 1;
+                    totalRankSum += rank;
+                    if (rank === 4) lastPlaceCount += 1;
+                    }
+                });
+                // 合算バランスは finalScore ベースで加算
+                const myFinal = (rec.players[playerIndex] && rec.players[playerIndex].finalScore) || 0;
+                totalBalance += myFinal;
+                } else {
+                // ラウンド情報が無ければセッション単位で重み付け
+                const sorted = [...(rec.players || [])].sort((a,b) => b.finalScore - a.finalScore);
+                const my = sorted.find(p => p.name === playerName);
+                if (!my) return;
+                const rank = sorted.indexOf(my) + 1;
+                const weight = Array.isArray(rec.rounds) ? rec.rounds.length : (rec.meta && Number.isFinite(rec.meta.rounds) ? Number(rec.meta.rounds) : 1);
+                totalRounds += weight;
+                totalRankSum += rank * weight;
+                if (rank === 4) lastPlaceCount += weight;
+                totalBalance += my.finalScore || 0;
                 }
             });
-            avgRankEl.textContent = (totalRank / totalGames).toFixed(2);
-            const lastAvoidRate = (1 - (lastPlaceCount / totalGames)) * 100;
-            lastRateEl.textContent = `${lastAvoidRate.toFixed(1)}%`;
-            totalBalanceEl.textContent = `${totalBalance >= 0 ? '+' : ''}${totalBalance.toFixed(0)}`;
-            totalBalanceEl.className = 'stat-number';
-            if (totalBalance > 0) totalBalanceEl.classList.add('is-positive');
-            if (totalBalance < 0) totalBalanceEl.classList.add('is-negative');
-        }
 
+            const avgRank = totalRounds > 0 ? (totalRankSum / totalRounds) : NaN;
+            avgRankEl && (avgRankEl.textContent = isNaN(avgRank) ? 'N/A' : avgRank.toFixed(2));
+            const lastAvoidRate = totalRounds > 0 ? (1 - (lastPlaceCount / totalRounds)) * 100 : 0;
+            lastRateEl && (lastRateEl.textContent = `${lastAvoidRate.toFixed(1)}%`);
+            if (totalBalanceEl) {
+                totalBalanceEl.textContent = `${totalBalance >= 0 ? '+' : ''}${totalBalance.toFixed(0)}`;
+                totalBalanceEl.className = 'stat-number';
+                totalBalanceEl.classList.toggle('is-positive', totalBalance > 0);
+                totalBalanceEl.classList.toggle('is-negative', totalBalance < 0);
+            }
+            }
         // --- プルダウンメニューのHTML構造を生成 ---
         container.innerHTML = ''; // まずは中身を空にする
 
@@ -905,6 +936,19 @@
         updateDashboard(playerNames[0]);
     }
 
+    // records: 保存されている記録配列（グローバル変数 `records` を使う）
+    function getPlayerTotalMatches(recordsArr, playerName) {
+    let total = 0;
+    (recordsArr || []).forEach(rec => {
+        const participated = (rec.players || []).some(p => p && p.name === playerName);
+        if (!participated) return;
+        if (Array.isArray(rec.rounds)) { total += rec.rounds.length; return; }
+        if (rec.meta && Number.isFinite(rec.meta.rounds)) { total += Number(rec.meta.rounds) || 0; return; }
+        total += 1;
+    });
+    return total;
+    }
+
 
 
     // initial
@@ -954,5 +998,7 @@
     });
     }
 
- 
+   
+
+
 })();
