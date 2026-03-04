@@ -91,6 +91,8 @@
     try { records = JSON.parse(localStorage.getItem(RECORDS_KEY) || '[]'); if(!Array.isArray(records)) records = []; } catch(e){ records = []; }
     let currentSession = null;
 
+    // ▼▼▼ [新規追加] グラフのインスタンスを保持する変数 ▼▼▼
+    let cumulativeChartInstance = null;
     // --- Helpers ---
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'<','>':'>','"':'&quot;',"'":'&#39;'}[c])); }
     function savePlayers(){ localStorage.setItem(PLAYERS_KEY, JSON.stringify(players)); renderPlayersUI(); renderHome(); }
@@ -793,6 +795,91 @@
     if(headerLogo) headerLogo.addEventListener('click', e=>{ e && e.preventDefault(); showPage('home'); renderHome(); });
 
 
+
+    // ▼▼▼ [新規追加] ここからグラフ関連の関数 ▼▼▼
+
+    /**
+     * 指定されたプレイヤーの累計収支データを計算して返す
+     * @param {string} playerName - 収支を計算するプレイヤー名
+     * @returns {{labels: string[], number[]}} - チャート用のラベルとデータのオブジェクト
+     */
+    function calculateCumulativeData(playerName) {
+      // 日付の昇順でソート
+      const sortedRecords = [...records].sort((a, b) => new Date(a.created) - new Date(b.created));
+
+      const labels = [];
+      const data = [];
+      let cumulativeTotal = 0;
+
+      for (const record of sortedRecords) {
+        const playerInRecord = record.players.find(p => p.name === playerName);
+        if (playerInRecord) {
+          cumulativeTotal += playerInRecord.finalScore;
+          labels.push(new Date(record.created).toLocaleDateString());
+          data.push(cumulativeTotal);
+        }
+      }
+      return { labels, data };
+    }
+
+    /**
+     * 累計収支推移グラフを描画または更新する
+     * @param {string} playerName - グラフを描画するプレイヤー名
+     */
+    function renderCumulativeBalanceChart(playerName) {
+      const ctx = document.getElementById('cumulativeBalanceChart');
+      if (!ctx) return;
+      
+      const { labels, data } = calculateCumulativeData(playerName);
+
+      const chartData = {
+        labels: labels,
+        datasets: [{
+          label: `${playerName} の累計収支`,
+          data,
+          borderColor: 'var(--accent)',
+          backgroundColor: 'rgba(47, 166, 74, 0.15)',
+          fill: true,
+          tension: 0.2,
+          pointBackgroundColor: 'var(--accent)',
+        }]
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+          y: { ticks: { color: '#ffffff' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            callbacks: {
+              label: function(context) {
+                const value = context.parsed.y;
+                return `${context.dataset.label}: ${value >= 0 ? '+' : ''}${value.toFixed(0)}`;
+              }
+            }
+          }
+        }
+      };
+
+      if (cumulativeChartInstance) {
+        cumulativeChartInstance.data = chartData;
+        cumulativeChartInstance.options = chartOptions;
+        cumulativeChartInstance.update();
+      } else {
+        cumulativeChartInstance = new Chart(ctx, {
+          type: 'line',
+          chartData,
+          options: chartOptions
+        });
+      }
+    }
+
+
     // ===================================================
     // ===== ダッシュボード機能 (プルダウンメニュー版) =====
     // ===================================================
@@ -874,6 +961,7 @@
                 totalBalanceEl.classList.toggle('is-positive', totalBalance > 0);
                 totalBalanceEl.classList.toggle('is-negative', totalBalance < 0);
             }
+            renderCumulativeBalanceChart(playerName);
             }
         // --- プルダウンメニューのHTML構造を生成 ---
         container.innerHTML = ''; // まずは中身を空にする

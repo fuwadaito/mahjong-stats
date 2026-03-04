@@ -55,7 +55,9 @@
         <div class="left-column">
             <div class="panel panel-chart">
             <h3 class="h-underline">累計収支の推移</h3>
-            <div class="chart-area" id="earnings-chart"></div>
+            <div class="chart-area" id="earnings-chart" style="position: relative; height: 300px; width: 100%;">
+                <canvas id="cumulativeBalanceChart"></canvas>
+            </div>
             </div>
 
             <div class="panel panel-distribution">
@@ -242,6 +244,7 @@
 
   <footer class="footer">JAN STA</footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="./app.js"></script>
   <script src="./app-newmatch.js"></script>
 </body>
