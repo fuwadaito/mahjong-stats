@@ -908,52 +908,41 @@
                 return;
             }
 
-            // ラウンド単位の平均順位を計算
-            let totalRounds = 0;
+            let totalMatches = 0;    // ← 変数名を変更
             let totalRankSum = 0;
             let lastPlaceCount = 0;
             let totalBalance = 0;
 
             playerRecords.forEach(rec => {
-                const playerIndex = (rec.players || []).findIndex(p => p.name === playerName);
-                if (playerIndex === -1) return;
+                if (!rec.players || rec.players.length !== 4) return; // プレイヤーデータがなければスキップ
 
-                if (Array.isArray(rec.rounds) && rec.rounds.length > 0) {
-                // 各ラウンドごとに順位を算出
-                rec.rounds.forEach(round => {
-                    const pts = round.points || round.post || [];
-                    if (!Array.isArray(pts) || pts.length === 0) return;
-                    const idxs = pts.map((v,i) => i).sort((a,b) => {
-                    if (pts[b] === pts[a]) return a - b;
-                    return pts[b] - pts[a];
-                    });
-                    const rank = idxs.indexOf(playerIndex) + 1;
-                    if (rank > 0) {
-                    totalRounds += 1;
-                    totalRankSum += rank;
-                    if (rank === 4) lastPlaceCount += 1;
+                const myPlayer = rec.players.find(p => p.name === playerName);
+                if (!myPlayer) return; // プレイヤーがその対局にいなければスキップ
+
+                // --- ここからが新しい計算ロジック ---
+                totalMatches += 1; // 1レコードを1対局としてカウント
+
+                // 最終スコアでプレイヤーを降順にソートして順位を決定
+                const sortedPlayers = [...rec.players].sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
+                
+                // 自分の順位を見つける
+                const myRank = sortedPlayers.findIndex(p => p.name === playerName) + 1;
+
+                if (myRank > 0) {
+                    totalRankSum += myRank;
+                    if (myRank === 4) {
+                        lastPlaceCount += 1;
                     }
-                });
-                // 合算バランスは finalScore ベースで加算
-                const myFinal = (rec.players[playerIndex] && rec.players[playerIndex].finalScore) || 0;
-                totalBalance += myFinal;
-                } else {
-                // ラウンド情報が無ければセッション単位で重み付け
-                const sorted = [...(rec.players || [])].sort((a,b) => b.finalScore - a.finalScore);
-                const my = sorted.find(p => p.name === playerName);
-                if (!my) return;
-                const rank = sorted.indexOf(my) + 1;
-                const weight = Array.isArray(rec.rounds) ? rec.rounds.length : (rec.meta && Number.isFinite(rec.meta.rounds) ? Number(rec.meta.rounds) : 1);
-                totalRounds += weight;
-                totalRankSum += rank * weight;
-                if (rank === 4) lastPlaceCount += weight;
-                totalBalance += my.finalScore || 0;
                 }
+                
+                // 総合収支を計算
+                totalBalance += (myPlayer.finalScore || 0);
             });
 
-            const avgRank = totalRounds > 0 ? (totalRankSum / totalRounds) : NaN;
-            avgRankEl && (avgRankEl.textContent = isNaN(avgRank) ? 'N/A' : avgRank.toFixed(2));
-            const lastAvoidRate = totalRounds > 0 ? (1 - (lastPlaceCount / totalRounds)) * 100 : 0;
+            const avgRank = totalMatches > 0 ? (totalRankSum / totalMatches) : NaN;
+            avgRankEl && (avgRankEl.textContent = isNaN(avgRank) ? 'N/A' : avgRank.toFixed(1));
+            
+            const lastAvoidRate = totalMatches > 0 ? (1 - (lastPlaceCount / totalMatches)) * 100 : 0;
             lastRateEl && (lastRateEl.textContent = `${lastAvoidRate.toFixed(1)}%`);
             if (totalBalanceEl) {
                 totalBalanceEl.textContent = `${totalBalance >= 0 ? '+' : ''}${totalBalance.toFixed(0)}`;
