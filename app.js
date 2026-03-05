@@ -306,11 +306,50 @@
      * 特定の対局記録の詳細ページを生成・表示する
      * @param {object} record 表示する記録オブジェクト
      */
+    /**
+ * 特定の対局記録の詳細ページを生成・表示する
+ * @param {object} record 表示する記録オブジェクト
+ */
     function renderRecordDetailPage(record) {
-        if (!record || !recordDetailSummary || !recordDetailRounds) return;
+        // ★★★ この関数を全面的に書き換えます ★★★
 
-        recordDetailSummary.innerHTML = ''; // サマリー表示を完全に削除
+        if (!pages.recordDetail) {
+            console.error('Error: record-detail-page element not found.');
+            return;
+        }
+        if (!record) {
+            pages.recordDetail.innerHTML = `<p>記録が見つかりません。</p>`;
+            return;
+        }
 
+        const recordDate = new Date(record.created).toLocaleDateString('ja-JP');
+
+        // --- ページ全体のHTML構造を生成 ---
+            // --- ページ全体のHTML構造を生成 ---
+        pages.recordDetail.innerHTML = `
+            <div class="page-header">
+                <button id="detail-back-to-records" class="button back-button">← 記録一覧へ</button>
+                
+            </div>
+            <h2>対局詳細</h2>
+            <div class="record-meta">
+                <p>
+                    <strong>日付:</strong> 
+                    <span id="record-date-display">${recordDate}</span>
+                    <input type="date" id="record-date-input" style="display:none;">
+                    
+                    <span class="date-edit-actions" style="margin-left: 1rem;">
+                        <button id="editRecordBtn" class="button small">変更</button>
+                        <button id="saveRecordBtn" class="button primary small" style="display:none;">保存</button>
+                        <button id="cancelEditBtn" class="button small" style="display:none;">キャンセル</button>
+                    </span>
+                </p>
+            </div>
+            <div id="record-detail-rounds-container"></div>
+        `;
+
+        // --- ラウンド結果のテーブルを生成して挿入 ---
+        const roundsContainer = document.getElementById('record-detail-rounds-container');
         let roundsTableHtml = `
             <table>
                 <thead>
@@ -324,7 +363,6 @@
                 </thead>
                 <tbody>
         `;
-        // 各ラウンドの行を追加
         (record.rounds || []).forEach((round, index) => {
             roundsTableHtml += `<tr><td>${index + 1}</td>`;
             (round.points || [0,0,0,0]).forEach(point => {
@@ -334,8 +372,6 @@
             });
             roundsTableHtml += `</tr>`;
         });
-
-        // ▼▼▼ [変更点1] チップ枚数に色付け用のクラスを追加 ▼▼▼
         roundsTableHtml += `<tr class="chip-total-row"><td>チップ</td>`;
         record.players.forEach(player => {
             const chipCount = player.chipCount || 0;
@@ -343,8 +379,6 @@
             roundsTableHtml += `<td class="${className}">${chipCount}</td>`;
         });
         roundsTableHtml += `</tr>`;
-
-        // ▼▼▼ [変更点2] 最終ポイントにも同じクラス名ルールを適用 ▼▼▼
         roundsTableHtml += `<tr class="final-score-row"><td>ポイント</td>`;
         record.players.forEach(player => {
             const score = (player.finalScore || 0);
@@ -352,10 +386,66 @@
             const className = score > 0 ? 'positive' : (score < 0 ? 'negative' : '');
             roundsTableHtml += `<td class="${className}">${scoreText}</td>`;
         });
-        roundsTableHtml += `</tr>`;
+        roundsTableHtml += `</tr></tbody></table>`;
+        roundsContainer.innerHTML = roundsTableHtml;
 
-        roundsTableHtml += `</tbody></table>`;
-        recordDetailRounds.innerHTML = roundsTableHtml;
+        // --- ここからが追加したイベント処理ロジックです ---
+        document.getElementById('detail-back-to-records').addEventListener('click', () => {
+            showPage('records');
+        });
+
+        const editBtn = document.getElementById('editRecordBtn');
+        const saveBtn = document.getElementById('saveRecordBtn');
+        const cancelBtn = document.getElementById('cancelEditBtn');
+        const dateDisplay = document.getElementById('record-date-display');
+        const dateInput = document.getElementById('record-date-input');
+
+        const toggleEditMode = (isEditing) => {
+            editBtn.style.display = isEditing ? 'none' : 'inline-block';
+            saveBtn.style.display = isEditing ? 'inline-block' : 'none';
+            cancelBtn.style.display = isEditing ? 'inline-block' : 'none';
+
+            dateDisplay.style.display = isEditing ? 'none' : 'inline';
+            dateInput.style.display = isEditing ? 'inline-block' : 'none';
+        };
+
+        editBtn.addEventListener('click', () => {
+            // ISO文字列から 'YYYY-MM-DD' 形式に変換してinputにセット
+            dateInput.value = record.created.split('T')[0];
+            toggleEditMode(true);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            toggleEditMode(false);
+        });
+
+        saveBtn.addEventListener('click', () => {
+            const recordIndex = records.findIndex(r => r.id === record.id);
+            if (recordIndex === -1) {
+                alert('エラー: 対象の記録が見つかりませんでした。');
+                toggleEditMode(false);
+                return;
+            }
+
+            const newDate = dateInput.value;
+            if (!newDate) {
+                alert('日付を入力してください。');
+                return;
+            }
+            const newDateISO = new Date(newDate).toISOString();
+
+            // データを更新
+            records[recordIndex].created = newDateISO;
+            if (records[recordIndex].meta) {
+                records[recordIndex].meta.date = newDateISO;
+            }
+
+            saveRecords(); // localStorageに保存
+            alert('日付を変更しました。');
+            
+            // 更新されたオブジェクトでページを再描画
+            renderRecordDetailPage(records[recordIndex]);
+        });
     }
 
     // --- 4. イベントリスナー ---
