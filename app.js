@@ -691,7 +691,7 @@
         // 4. 最終的な記録オブジェクトを作成
         const finalRecord = {
             id: 'rec_' + Date.now(),
-            created: new Date().toISOString(),
+            created: currentSession.meta.date,
             meta: currentSession.meta,
             players: currentSession.players.map((name, i) => ({
                 name,
