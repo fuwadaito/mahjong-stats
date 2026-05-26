@@ -9,7 +9,7 @@ A simple and intuitive web application to record and analyze four-player mahjong
 
 * **Match Result Recording**: Input placement and scores seamlessly. (対局順位や素点の入力・記録)
 * **Performance Metrics**: View key statistics such as average placement and top-two finish rates. (平均順位や連対率などの主要スタッツ自動計算)
-* **Responsive Design**: Clean user interface that works smoothly on mobile devices. (スマホでも快適に操作できるレスポンシブ対応)
+
 
 ## 🛠️ Tech Stack (技術スタック)
 
